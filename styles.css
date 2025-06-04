@@ -349,5 +349,15 @@ html, body {
   display: block;
   position: relative;
 }
-
+.page {
+  width: 6in;          /* Page width (6 inches, similar to a book size) */
+  height: 9in;         /* Page height (9 inches, similar to a book size) */
+  margin: 40px auto;   /* Top/bottom space and center the page horizontally */
+  background: white;   /* White paper */
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1); /* Soft shadow for a paper look */
+  border: 1px solid #ccc;
+  padding: 1in 0.75in 1in 1in; /* Top, right, bottom, left (room for gutter/margin) */
+  position: relative;
+  overflow: hidden;
+}
 
