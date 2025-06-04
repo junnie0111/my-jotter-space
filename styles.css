@@ -361,3 +361,6 @@ html, body {
   overflow: hidden;
 }
 
+.has-submenu:hover > .dropdown-menu {
+  display: block;
+}
