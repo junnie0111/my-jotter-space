@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Jotter Space</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Menu Bar -->
+  <div id="menuBar">
+    <!-- ========== FILE MENU ========== -->
+    <div class="menu-item">
+      <span class="menu-label" id="fileLabel">File</span>
+      <div class="dropdown-menu" id="fileMenu">
+        <div class="menu-option">New Project/Book</div>
+        <div class="menu-option">Open</div>
+        <div class="menu-option has-submenu">
+          Recent Projects
+          <span class="arrow">▶</span>
+          <!-- If you need a nested submenu later, it would go here -->
+        </div>
+        <div class="menu-separator"></div>
+        <div class="menu-option">Close Project</div>
+        <div class="menu-option">Save Project</div>
+        <div class="menu-option">Save Project As...</div>
+        <div class="menu-separator"></div>
+        <div class="menu-option has-submenu" id="importParent">
+          Import
+          <span class="arrow">▶</span>
+          <!-- Nested Import submenu could go here -->
+        </div>
+        <div class="menu-option has-submenu" id="exportParent">
+          Export
+          <span class="arrow">▶</span>
+          <div class="dropdown-menu" id="exportMenu">
+            <div class="menu-option" id="exportPdf">Export to PDF</div>
+            <div class="menu-option" id="exportDocx">Export to .docx</div>
+            <div class="menu-separator"></div>
+            <div class="menu-option" id="exportChapterTxt">Export Chapter (.txt)</div>
+            <div class="menu-option" id="exportChapterHtml">Export Chapter (.html)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== EDIT MENU ========== -->
+    <div class="menu-item">
+      <span class="menu-label" id="editLabel">Edit</span>
+      <div class="dropdown-menu" id="editMenu">
+        <div class="menu-option" id="findOption">Find…</div>
+        <div class="menu-option" id="replaceOption">Replace…</div>
+      </div>
+    </div>
+
+    <!-- ========== INSERT MENU ========== -->
+    <div class="menu-item">
+      <span class="menu-label" id="insertLabel">Insert</span>
+      <div class="dropdown-menu" id="insertMenu">
+        <div class="menu-option" id="insertImageOption">Insert Image…</div>
+        <div class="menu-option" id="insertCharOption">Insert Special Character…</div>
+        <div class="menu-option" id="insertTextBoxOption">Insert Text Box…</div>
+      </div>
+    </div>
+
+    <!-- ========== VIEW MENU ========== -->
+    <div class="menu-item">
+      <span class="menu-label" id="viewLabel">View</span>
+      <div class="dropdown-menu" id="viewMenu">
+        <div class="menu-option" id="writingGoalsOption">Writing Goals…</div>
+        <div class="menu-option" id="writingStatsOption">Writing Statistics</div>
+        <div class="menu-option" id="focusModeOption">Focus Mode</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 📖 Book Information Bar -->
+  <div id="bookInfoBar">
+    <div class="book-info-section">
+      <span class="book-title" id="bookTitle">Untitled Project</span>
+      <span class="book-type" id="bookType">Novel</span>
+    </div>
+    <div class="book-specs">
+      <span id="bookSize">6" × 9"</span>
+      <span id="bookMargins">Gutter: 0.375"</span>
+      <span id="estimatedPages">~200 pages</span>
+    </div>
+  </div>
+
+  <div id="appContainer">
+    <!-- ✏️ Formatting Toolbar -->
+    <div id="formattingToolbar">
+      <button class="toolbar-btn" id="boldBtn" title="Bold">B</button>
+      <button class="toolbar-btn" id="italicBtn" title="Italic">I</button>
+      <button class="toolbar-btn" id="underlineBtn" title="Underline">U</button>
+      <button class="toolbar-btn" id="undoBtn" title="Undo">↺</button>
+      <button class="toolbar-btn" id="redoBtn" title="Redo">↻</button>
+      <span class="toolbar-separator"></span>
+      <select id="headingSelect" class="toolbar-select">
+        <option value="normal">Normal</option>
+        <option value="h1">Heading 1</option>
+        <option value="h2">Heading 2</option>
+        <option value="h3">Heading 3</option>
+        <option value="h4">Heading 4</option>
+        <option value="h5">Heading 5</option>
+        <option value="h6">Heading 6</option>
+      </select>
+      <span class="toolbar-separator"></span>
+      <select id="alignSelect" class="toolbar-select">
+        <option value="left">Align Left</option>
+        <option value="center">Center</option>
+        <option value="right">Align Right</option>
+        <option value="justify">Justify</option>
+      </select>
+      <span class="toolbar-separator"></span>
+      <div class="color-wrapper">
+        <button class="color-button" id="textColorButton" title="Text Color">A</button>
+        <div class="color-palette" id="textColorPalette" style="display: none;">
+          <div class="color-swatch" data-color="#000000" style="background: #000000;"></div>
+          <div class="color-swatch" data-color="#FF0000" style="background: #FF0000;"></div>
+          <div class="color-swatch" data-color="#0000FF" style="background: #0000FF;"></div>
+          <div class="color-swatch" data-color="#008000" style="background: #008000;"></div>
+          <div class="color-swatch" data-color="#800080" style="background: #800080;"></div>
+          <div class="color-swatch" data-color="#FFA500" style="background: #FFA500;"></div>
+          <div class="color-swatch" data-color="#A52A2A" style="background: #A52A2A;"></div>
+          <div class="color-swatch" data-color="#808080" style="background: #808080;"></div>
+        </div>
+      </div>
+      <div class="color-wrapper">
+        <button class="color-button" id="highlightButton" title="Highlight">🖍</button>
+        <div class="color-palette" id="highlightPalette" style="display: none;">
+          <div class="color-swatch" data-color="transparent" style="background: white; border: 2px solid #ccc;" title="Remove highlight">✖</div>
+          <div class="color-swatch" data-color="#FFFF00" style="background: #FFFF00;"></div>
+          <div class="color-swatch" data-color="#00FF00" style="background: #00FF00;"></div>
+          <div class="color-swatch" data-color="#00FFFF" style="background: #00FFFF;"></div>
+          <div class="color-swatch" data-color="#FF00FF" style="background: #FF00FF;"></div>
+          <div class="color-swatch" data-color="#FFA500" style="background: #FFA500;"></div>
+          <div class="color-swatch" data-color="#FFB6C1" style="background: #FFB6C1;"></div>
+          <div class="color-swatch" data-color="#E6E6FA" style="background: #E6E6FA;"></div>
+        </div>
+      </div>
+      <span class="toolbar-separator"></span>
+      <select id="fontSelect" class="toolbar-select">
+        <option value="Times New Roman">Times New Roman</option>
+        <option value="Arial">Arial</option>
+        <option value="Georgia">Georgia</option>
+        <option value="Courier New">Courier New</option>
+      </select>
+      <select id="fontSizeSelect" class="toolbar-select">
+        <option value="10pt">10pt</option>
+        <option value="12pt" selected>12pt</option>
+        <option value="14pt">14pt</option>
+        <option value="16pt">16pt</option>
+        <option value="18pt">18pt</option>
+      </select>
+    </div>
+
+    <div id="contentArea">
+      <!-- 📁 Binder Panel -->
+      <div id="binder">
+        <h2>📂 Binder</h2>
+        <button id="newDocButton">+ New Chapter</button>
+        <ul id="binderList"></ul>
+      </div>
+
+      <!-- 📝 Editor Panel -->
+      <div id="editorColumn">
+        <div id="rulerTop"></div>
+        <div class="editor-content-wrapper">
+          <div id="rulerLeft"></div>
+          <div id="textAreaWrapper">
+            <div id="textArea"></div>
+          </div>
+        </div>
+      </div>
+    </div> <!-- end of contentArea -->
+
+    <!-- 📊 Status Bar -->
+    <div id="status-bar">
+      <span id="projectName">Untitled Project</span>
+      <div>
+        <span id="pageCount">Pages: 1</span>
+        <span id="wordCount">Words: 0</span>
+        <span id="unsavedIndicator" style="margin-left:10px; color: red; display: none;">● Unsaved</span>
+      </div>
+    </div>
+  </div> <!-- end of appContainer -->
+
+  <script src="main.js"></script>
+</body>
+</html>
