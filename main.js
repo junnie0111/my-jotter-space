@@ -1013,6 +1013,16 @@ document.querySelectorAll('.menu-option').forEach(option => {
     document.getElementById('fileMenu').style.display = 'none';
   });
 });
+// Export current chapter as PDF
+function exportToPDF() {
+  alert("PDF export is coming soon!"); // This is just a placeholder for now
+}
+
+
+
+
+
+
 
 // ===============================
 // ⌨️ Keyboard Shortcuts
