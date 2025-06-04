@@ -739,7 +739,7 @@ function applyBookFormatting(dimensions, margins) {
   const gutterPx = margins.gutter * 96;
   const outsidePx = margins.outside * 96;
   const topPx = margins.top * 96;
-  const bottomPx = (margins.bottom + 0.8) * 96;
+  const bottomPx = margins.bottom * 96;
 
   const style = document.createElement('style');
   style.innerHTML = `
