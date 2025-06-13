@@ -1,6 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- html2canvas captures the timeline as an image -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<!-- jsPDF lets us package that image into a PDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<!-- Then your main.js -->
+
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>My Jotter Space</title>
@@ -15,15 +23,21 @@
       <div class="dropdown-menu" id="fileMenu">
         <div class="menu-option">New Project/Book</div>
         <div class="menu-option">Open</div>
-        <div class="menu-option has-submenu">
-          Recent Projects
-          <span class="arrow">▶</span>
-          <!-- If you need a nested submenu later, it would go here -->
-        </div>
+<div class="menu-option has-submenu" id="recentProjectsParent">
+  Recent Projects
+  <span class="arrow">▶</span>
+  <div class="dropdown-menu" id="recentProjectsMenu">
+    <!-- Recent projects will be populated here by JavaScript -->
+  </div>
+</div>
         <div class="menu-separator"></div>
         <div class="menu-option">Close Project</div>
         <div class="menu-option">Save Project</div>
         <div class="menu-option">Save Project As...</div>
+        <div class="menu-separator"></div>
+        <div class="menu-option">Print...</div>
+<div class="menu-separator"></div>
+       <div class="menu-option">Delete Project</div>
         <div class="menu-separator"></div>
         <div class="menu-option has-submenu" id="importParent">
           Import
@@ -47,10 +61,24 @@
     <!-- ========== EDIT MENU ========== -->
     <div class="menu-item">
       <span class="menu-label" id="editLabel">Edit</span>
-      <div class="dropdown-menu" id="editMenu">
-        <div class="menu-option" id="findOption">Find…</div>
-        <div class="menu-option" id="replaceOption">Replace…</div>
-      </div>
+<div class="dropdown-menu" id="editMenu">
+  <div class="menu-option" id="undoOption">Undo</div>
+  <div class="menu-option" id="redoOption">Redo</div>
+  <div class="menu-separator"></div>
+  <div class="menu-option" id="cutOption">Cut ctrl + x</div>
+  <div class="menu-option" id="copyOption">Copy ctrl + c</div>
+  <div class="menu-option" id="pasteOption">Paste ctrl +v</div>
+  <div class="menu-separator"></div>
+  <div class="menu-option" id="selectAllOption">Select All</div>
+  <div class="menu-separator"></div>
+  <div class="menu-option" id="findOption">Find…</div>
+  <div class="menu-option" id="replaceOption">Replace…</div>
+<div class="menu-separator"></div>
+<div class="menu-option" style="color: #666; font-style: italic;">Text Case:</div>
+<div class="menu-option" style="color: #666; font-size: 12px;">Ctrl+Shift+U = UPPERCASE</div>
+<div class="menu-option" style="color: #666; font-size: 12px;">Ctrl+Shift+L = lowercase</div>
+<div class="menu-option" style="color: #666; font-size: 12px;">Ctrl+Shift+T = Title Case</div>
+</div>
     </div>
 
     <!-- ========== INSERT MENU ========== -->
@@ -71,6 +99,10 @@
         <div class="menu-option" id="writingStatsOption">Writing Statistics</div>
         <div class="menu-option" id="focusModeOption">Focus Mode</div>
       </div>
+    </div>
+    <!-- ========== SEARCH MENU (NEW) ========== -->
+    <div class="menu-item">
+      <span class="menu-label" id="searchLabel">🔍 Search</span>
     </div>
   </div>
 
@@ -153,29 +185,197 @@
         <option value="16pt">16pt</option>
         <option value="18pt">18pt</option>
       </select>
+      <span class="toolbar-separator"></span>
+<button class="toolbar-btn" id="toggleBinder" title="Toggle Binder Panel">📁</button>
+<button class="toolbar-btn" id="toggleWorldbuilding" title="Toggle Worldbuilding Panel">🌍</button>
     </div>
 
-    <div id="contentArea">
-      <!-- 📁 Binder Panel -->
-      <div id="binder">
-        <h2>📂 Binder</h2>
-        <button id="newDocButton">+ New Chapter</button>
-        <ul id="binderList"></ul>
-      </div>
+<div id="contentArea">
+  <!-- 📁 Binder Panel -->
+  <div id="binder">
+    <h2>📂 Binder</h2>
+    <button id="newDocButton">+ New Chapter</button>
+    <ul id="binderList"></ul>
+  </div>
 
-      <!-- 📝 Editor Panel -->
-      <div id="editorColumn">
-        <div id="rulerTop"></div>
-        <div class="editor-content-wrapper">
-          <div id="rulerLeft"></div>
-          <div id="textAreaWrapper">
-      <div id="textArea">
-  <div class="page" contenteditable="true"></div>
-</div>
+  <!-- 📝 Editor Panel -->
+  <div id="editorColumn">
+    <div id="rulerTop"></div>
+    <div class="editor-content-wrapper">
+      <div id="rulerLeft"></div>
+      <div id="textAreaWrapper">
+        <div id="textArea">
+          <div class="page" contenteditable="true"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🌍 Worldbuilding Panel (NEW) -->
+<div id="worldbuildingPanel" style="display: none;">
+  <div id="worldbuildingStaticHeader">
+    <span id="worldbuildingTitle">🌍 Worldbuilding</span>   <button id="expandWorldbuildingPanel" title="Expand/Collapse Panel">⟷</button>   <button id="closeWorldbuildingPanel">✕</button>
+
+
+    <div id="worldbuildingControls">
+    </div>
+  </div>
+  
+  <div id="worldbuildingTabs">
+    <button class="wb-tab active" data-tab="notes">Notes</button>
+<button class="wb-tab" data-tab="index">Index Cards</button>
+<button class="wb-tab" data-tab="research">Research</button>
+<button class="wb-tab" data-tab="timeline">Timeline/Map</button>
+  </div>
+    
+    <div id="worldbuildingContent">
+      <!-- Notes Tab Content -->
+      <div id="notesTab" class="wb-tab-content active">
+        <div id="notesBinder">
+          <button id="newNoteFolderButton">+ New Folder</button>
+          <ul id="notesFolderList"></ul>
+        </div>
+        <div id="notesEditor">
+          <div id="currentNoteTitle">Select a note to edit</div>
+          <div id="currentNoteContent" contenteditable="false">
+            Click on a note in a folder to start editing...
           </div>
         </div>
       </div>
-    </div> <!-- end of contentArea -->
+      
+      <!-- Other tabs (placeholder for now) -->
+      <!-- Index Cards Tab -->
+      <div id="indexTab" class="wb-tab-content">
+        <div id="indexCardsBinder">
+          <div id="indexCardControls">
+            <div class="dropdown-wrapper">
+              <button id="newIndexCardButton">+ New Index Card ▼</button>
+              <div id="newIndexCardDropdown" class="index-dropdown">
+              <div class="index-card-type" data-type="Character">Character</div>
+              <div class="index-card-type" data-type="Story Development">Story Development</div>
+              <div class="index-card-type" data-type="Location">Location</div>
+              <div class="index-card-type" data-type="Organizations">Organizations</div>
+              <div class="index-card-type" data-type="Events">Events</div>
+              <div class="index-card-type" data-type="Objects & Items">Objects & Items</div>
+              <div class="index-card-type" data-type="Cultures & Peoples">Cultures & Peoples</div>
+              <div class="index-card-type" data-type="Systems & Powers">Systems & Powers</div>
+              </div>
+            </div>
+            
+            <div class="dropdown-wrapper">
+              <button id="viewIndexCardsButton">View Cards ▼</button>
+              <div id="viewIndexCardsDropdown" class="index-dropdown">
+                <div class="view-card-type" data-type="Character">Character Cards</div>
+                <div class="view-card-type" data-type="Story Development">Story Development Cards</div>
+                <div class="view-card-type" data-type="Location">Location Cards</div>
+                <div class="view-card-type" data-type="Organizations">Organizations</div>
+                <div class="view-card-type" data-type="Events">Events</div>
+                <div class="view-card-type" data-type="Objects & Items">Objects & Items</div>
+                <div class="view-card-type" data-type="Cultures & Peoples">Cultures & Peoples</div>
+                <div class="view-card-type" data-type="Systems & Powers">Systems & Powers</div>
+              </div>
+            </div>
+            <!-- Tags Filter -->
+<div id="tagsFilter" style="margin-top: 10px;">
+</div>
+          </div>
+          
+          <div id="indexCardsList">
+            <div id="currentCardType">Select a card type to view</div>
+            <ul id="cardsInType"></ul>
+          </div>
+        </div>
+        
+        <div id="indexCardViewer">
+          <div id="currentCardTitle">Select an index card to view</div>
+          <div id="currentCardContent">
+            Click on an index card to view and edit it here...
+          </div>
+        </div>
+      </div>
+
+      <!-- Research Tab -->
+      <div id="researchTab" class="wb-tab-content">
+        <div id="researchBinder">
+          <button id="newResearchFolderButton">+ New Folder</button>
+          <ul id="researchFolderList"></ul>
+        </div>
+        <div id="researchViewer">
+          <div id="currentResearchTitle">Select a research item to view</div>
+          <div id="currentResearchContent">
+            Click on a research item in a folder to view it here...
+          </div>
+        </div>
+      </div>
+
+<!-- Timeline/Map Tab -->
+<div id="timelineTab" class="wb-tab-content">
+  <div id="timelineControls">
+    <div id="timelineLeftControls">
+      <!-- Search -->
+      <input
+        type="text"
+        id="timelineSearchInput"
+        placeholder="🔍 Search timeline…"
+      >
+
+      <!-- Card-type filter -->
+      <select id="timelineCardTypeFilter">
+        <option value="all">All Card Types</option>
+        <option value="Character">Character Events</option>
+        <option value="Story Development">Story Events</option>
+        <option value="Location">Location Events</option>
+        <option value="Organizations">Organization Events</option>
+        <option value="Events">Events</option>
+        <option value="Objects & Items">Object Events</option>
+        <option value="Cultures & Peoples">Cultural Events</option>
+        <option value="Systems & Powers">System Events</option>
+      </select>
+
+      <!-- ↓ New date-range filters ↓ -->
+      <input
+        type="date"
+        id="timelineStartDate"
+        style="margin-left:10px;"
+      >
+      <input
+        type="date"
+        id="timelineEndDate"
+        style="margin-left:5px;"
+      >
+    </div>
+
+    <!-- Refresh button (only one!) -->
+    <button
+      id="refreshTimelineButton"
+      type="button"
+    >🔄 Refresh Timeline</button>
+      <!-- ↓ New export button ↓ -->
+  <button id="exportTimelineButton" type="button">
+    📥 Export Timeline
+  </button>
+  </div>
+
+<div id="timelineLayers">
+  <div id="layerButtons">
+    <button class="layer-btn active" data-layer="characters">👤 Characters</button>
+    <button class="layer-btn active" data-layer="plot">📚 Plot</button>
+    <button class="layer-btn active" data-layer="world">🌍 World</button>
+    <button class="layer-btn active" data-layer="research">📜 Research</button>
+    <button class="layer-btn" id="showAllLayersBtn">📋 Show All</button>
+     <button id="addLayerButton"      type="button">➕ Add Layer</button>
+  </div>
+</div>
+  
+<div id="timelineDisplay">
+  <div id="timelineContent">
+    <div id="timelineMessage">Click "Refresh Timeline" to load events from your index cards!</div>
+  </div>
+</div>
+</div>
+    </div>
+  </div>
+</div><!-- end of contentArea -->
 
     <!-- 📊 Status Bar -->
     <div id="status-bar">
@@ -188,6 +388,29 @@
     </div>
   </div> <!-- end of appContainer -->
 
-  <script src="main.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/2.3.10/purify.min.js"></script> 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/docx/7.8.2/docx.min.js"></script>
+<script src="main.js"></script>
+<!-- Global Search Overlay -->
+<div id="globalSearchOverlay" style="display: none;">
+  <div id="globalSearchPanel">
+    <div id="globalSearchHeader">
+      <h3>🔍 Global Search</h3>
+      <button id="closeGlobalSearch">✕</button>
+    </div>
+    
+    <div id="globalSearchInput">
+      <input type="text" id="globalSearchBox" placeholder="Search across all your content..." autofocus>
+    </div>
+    
+    <div id="globalSearchResults">
+      <div id="searchWelcome">
+        Type above to search through chapters, characters, locations, notes, and research...
+      </div>
+    </div>
+  </div>
+</div>
 </body>
 </html>
